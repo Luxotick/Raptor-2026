@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkMax;
@@ -16,92 +14,69 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.FuelConstants.*;
 
 public class CANFuelSubsystem extends SubsystemBase {
-  private final SparkMax feederRoller;
-  private final SparkMax intakeLauncherRoller;
+  private final SparkMax intake_motor;
+  private final SparkMax launcher_motor;
 
-  /** Creates a new CANBallSubsystem. */
   public CANFuelSubsystem() {
-    // create brushed motors for each of the motors on the launcher mechanism
-    intakeLauncherRoller = new SparkMax(INTAKE_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
-    feederRoller = new SparkMax(FEEDER_MOTOR_ID, MotorType.kBrushless);
+    launcher_motor = new SparkMax(42, MotorType.kBrushless);
+    intake_motor = new SparkMax(41, MotorType.kBrushless);
 
-    // put default values for various fuel operations onto the dashboard
-    // all methods in this subsystem pull their values from the dashbaord to allow
-    // you to tune the values easily, and then replace the values in Constants.java
-    // with your new values. For more information, see the Software Guide.
     SmartDashboard.putNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE);
     SmartDashboard.putNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE);
     SmartDashboard.putNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE);
     SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
     SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
 
-    // create the configuration for the feeder roller, set a current limit and apply
-    // the config to the controller
-    SparkMaxConfig feederConfig = new SparkMaxConfig();
-    feederConfig.smartCurrentLimit(FEEDER_MOTOR_CURRENT_LIMIT);
-    feederRoller.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    SparkMaxConfig intakeConfig = new SparkMaxConfig();
+    intakeConfig.smartCurrentLimit(FEEDER_MOTOR_CURRENT_LIMIT);
+    intake_motor.configure(intakeConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
-    // create the configuration for the launcher roller, set a current limit, set
-    // the motor to inverted so that positive values are used for both intaking and
-    // launching, and apply the config to the controller
     SparkMaxConfig launcherConfig = new SparkMaxConfig();
     launcherConfig.inverted(true);
     launcherConfig.smartCurrentLimit(LAUNCHER_MOTOR_CURRENT_LIMIT);
-    intakeLauncherRoller.configure(launcherConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    launcher_motor.configure(launcherConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
   }
 
-  // A method to set the rollers to values for intaking
   public void intake() {
-    feederRoller.setVoltage(SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
-    intakeLauncherRoller
+    intake_motor.setVoltage(SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
+    launcher_motor
         .setVoltage(SmartDashboard.getNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE));
   }
 
-  // A method to set the rollers to values for ejecting fuel out the intake. Uses
-  // the same values as intaking, but in the opposite direction.
   public void eject() {
-    feederRoller
+    intake_motor
         .setVoltage(-1 * SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
-    intakeLauncherRoller
+    launcher_motor
         .setVoltage(-1 * SmartDashboard.getNumber("Intaking launcher roller value", INTAKING_INTAKE_VOLTAGE));
   }
 
-  // A method to set the rollers to values for launching.
   public void launch() {
-    feederRoller.setVoltage(SmartDashboard.getNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE));
-    intakeLauncherRoller
+    intake_motor.setVoltage(SmartDashboard.getNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE));
+    launcher_motor
         .setVoltage(SmartDashboard.getNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE));
   }
 
-  // A method to stop the rollers
   public void stop() {
-    feederRoller.set(0);
-    intakeLauncherRoller.set(0);
+    intake_motor.set(0);
+    launcher_motor.set(0);
   }
 
-  // A method to spin up the launcher roller while spinning the feeder roller to
-  // push Fuel away from the launcher
   public void spinUp() {
-    feederRoller
+    intake_motor
         .setVoltage(SmartDashboard.getNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE));
-    intakeLauncherRoller
+    launcher_motor
         .setVoltage(SmartDashboard.getNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE));
   }
 
-  // A command factory to turn the spinUp method into a command that requires this
-  // subsystem
   public Command spinUpCommand() {
     return this.run(() -> spinUp());
   }
 
-  // A command factory to turn the launch method into a command that requires this
-  // subsystem
   public Command launchCommand() {
     return this.run(() -> launch());
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
   }
 }
