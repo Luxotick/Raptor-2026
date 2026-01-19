@@ -14,10 +14,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.swerve.Swerve;
 import swervelib.SwerveInputStream;
+import frc.robot.subsystems.CANFuelSubsystem;
 import frc.robot.subsystems.atardover.*;
 
 public class RobotContainer {
   final CommandXboxController joystick = new CommandXboxController(0);
+
+  private final CANFuelSubsystem ballSubsystem = new CANFuelSubsystem();
+
 
   public final Swerve swerve = Swerve.getInstance();
   // public final Climb climb = Climb.getInstance();
@@ -35,9 +39,19 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-        joystick.rightTrigger().whileTrue(atarDover.getInstance().runVerici());
-        joystick.leftTrigger().whileTrue(atarDover.getInstance().runAlici());
-        joystick.leftBumper().whileTrue(atarDover.getInstance().runTersAtarDover());
+
+    joystick.leftBumper()
+        .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.intake(), () -> ballSubsystem.stop()));
+    // While the right bumper on the operator controller is held, spin up for 1
+    // second, then launch fuel. When the button is released, stop.
+    joystick.rightBumper()
+        .whileTrue(ballSubsystem.spinUpCommand().withTimeout(Constants.FuelConstants.SPIN_UP_SECONDS)
+            .andThen(ballSubsystem.launchCommand())
+            .finallyDo(() -> ballSubsystem.stop()));
+    // While the A button is held on the operator controller, eject fuel back out
+    // the intake
+    joystick.a()
+        .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.eject(), () -> ballSubsystem.stop()));
 
     SwerveInputStream driveAngularVelocity =
         SwerveInputStream.of(
