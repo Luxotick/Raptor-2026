@@ -14,7 +14,7 @@ public final class Constants {
     public static final int LAUNCHER_MOTOR_CURRENT_LIMIT = 60;
 
     public static final double INTAKING_FEEDER_VOLTAGE = 12;
-    public static final double INTAKING_INTAKE_VOLTAGE = 10;
+    public static final double INTAKING_LAUNCHER_VOLTAGE = 10;
     public static final double LAUNCHING_FEEDER_VOLTAGE = 9;
     public static final double LAUNCHING_LAUNCHER_VOLTAGE = 10.6;
     public static final double SPIN_UP_FEEDER_VOLTAGE = 6;

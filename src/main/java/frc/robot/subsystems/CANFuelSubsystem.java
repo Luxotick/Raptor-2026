@@ -22,7 +22,7 @@ public class CANFuelSubsystem extends SubsystemBase {
     intake_motor = new SparkMax(41, MotorType.kBrushless);
 
     SmartDashboard.putNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE);
-    SmartDashboard.putNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE);
+    SmartDashboard.putNumber("Intaking intake roller value", INTAKING_LAUNCHER_VOLTAGE);
     SmartDashboard.putNumber("Launching feeder roller value", LAUNCHING_FEEDER_VOLTAGE);
     SmartDashboard.putNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE);
     SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
@@ -40,14 +40,14 @@ public class CANFuelSubsystem extends SubsystemBase {
   public void intake() {
     intake_motor.setVoltage(SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
     launcher_motor
-        .setVoltage(SmartDashboard.getNumber("Intaking intake roller value", INTAKING_INTAKE_VOLTAGE));
+        .setVoltage(SmartDashboard.getNumber("Intaking intake roller value", INTAKING_LAUNCHER_VOLTAGE));
   }
 
   public void eject() {
     intake_motor
         .setVoltage(-1 * SmartDashboard.getNumber("Intaking feeder roller value", INTAKING_FEEDER_VOLTAGE));
     launcher_motor
-        .setVoltage(-1 * SmartDashboard.getNumber("Intaking launcher roller value", INTAKING_INTAKE_VOLTAGE));
+        .setVoltage(-1 * SmartDashboard.getNumber("Intaking launcher roller value", INTAKING_LAUNCHER_VOLTAGE));
   }
 
   public void launch() {
