@@ -40,6 +40,9 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class Swerve extends SubsystemBase {
 
   private static Swerve instance;
@@ -56,6 +59,7 @@ public class Swerve extends SubsystemBase {
   }
 
   private final SwerveDrive swerveDrive;
+  private final Field2d field = new Field2d();
 
   private Alliance mAlliance = Alliance.Red;
 
@@ -81,6 +85,7 @@ public class Swerve extends SubsystemBase {
     swerveDrive.setModuleEncoderAutoSynchronize(false, 3);
     configureAutoBuilder();
 
+    SmartDashboard.putData("Field", field);
     // RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyro)); TODO
   }
 
@@ -96,6 +101,7 @@ public class Swerve extends SubsystemBase {
 
     drivePose.set(getPose());
     drivePoseLog.append(getPose());
+    field.setRobotPose(getPose());
   }
 
   public Alliance getAlliance() {

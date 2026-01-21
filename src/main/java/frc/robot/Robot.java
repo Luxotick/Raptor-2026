@@ -27,6 +27,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     robotContainer.logger.periodic();
+    robotContainer.vision.updatePoseEstimation();
 
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
   }

@@ -15,6 +15,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.swerve.Swerve;
 import swervelib.SwerveInputStream;
 import frc.robot.subsystems.CANFuelSubsystem;
+import frc.robot.util.Vision;
 
 public class RobotContainer {
   final CommandXboxController joystick = new CommandXboxController(0);
@@ -23,6 +24,7 @@ public class RobotContainer {
 
 
   public final Swerve swerve = Swerve.getInstance();
+  public final Vision vision = new Vision(swerve);
   // public final Climb climb = Climb.getInstance();
 
   public final Telemetry logger = new Telemetry();
@@ -44,9 +46,9 @@ public class RobotContainer {
     // While the right bumper on the operator controller is held, spin up for 1
     // second, then launch fuel. When the button is released, stop.
     joystick.rightBumper()
-        .whileTrue(ballSubsystem.spinUpCommand().withTimeout(Constants.FuelConstants.SPIN_UP_SECONDS)
-            .andThen(ballSubsystem.launchCommand())
+        .whileTrue((ballSubsystem.launchCommand())
             .finallyDo(() -> ballSubsystem.stop()));
+            
     // While the A button is held on the operator controller, eject fuel back out
     // the intake
     joystick.a()
@@ -61,7 +63,7 @@ public class RobotContainer {
             .deadband(OperatorConstants.DEADBAND)
             .allianceRelativeControl(true);
 
-    swerve.setDefaultCommand(swerve.driveCommand2(driveAngularVelocity));
+    swerve.setDefaultCommand(swerve.driveFieldOriented(driveAngularVelocity));
 
     joystick.povUp().onTrue(Commands.runOnce(swerve::zeroGyro));
   }
