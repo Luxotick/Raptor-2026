@@ -6,6 +6,10 @@ import limelight.networktables.AngularVelocity3d;
 import limelight.networktables.LimelightPoseEstimator;
 import limelight.networktables.PoseEstimate;
 import limelight.networktables.LimelightSettings.LEDMode;
+import limelight.networktables.LimelightSettings.ImuMode;
+import limelight.networktables.LimelightPoseEstimator.BotPose;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -62,13 +66,13 @@ public class Vision {
          
          ll.getSettings()
             .withLimelightLEDMode(LEDMode.PipelineControl)
+            .withImuMode(ImuMode.ExternalImu) // Swerve gyro kullaniyoruz, external IMU modu
             .withCameraOffset(new Pose3d(forward, right, up, new Rotation3d(0, 0, 0))) 
             .save();
     }
 
     public void updatePoseEstimation() {
         if (limelightRight == null || poseEstimatorRight == null) {
-           // If camera/estimator not ready yet, report and skip.
            SmartDashboard.putBoolean("Vision/EstimatorReady", false);
            return;
         }
@@ -77,16 +81,8 @@ public class Vision {
     }
 
     private void updatePoseForLimelight(Limelight ll, LimelightPoseEstimator estimator) {
-        // MegaTag2 için Robot Orientation güncellenmesi gerekiyor
-        
-        // Swerve'den gyro verilerini alıyoruz
         Rotation2d heading = swerve.getHeading();
         ChassisSpeeds robotVelocity = swerve.getVelocity();
-        
-        // Orientation3d oluşturma
-        // Pitch ve Roll için elimizde veri yoksa 0 kabul ediyoruz.
-        // Yaw (başlık açısı) swerve'den geliyor.
-        // Açısal hızlar (Angular Velocity) MegaTag2 için önemlidir. Yaw hızı swerve'den gelir.
         
         ll.getSettings()
           .withRobotOrientation(
@@ -101,18 +97,27 @@ public class Vision {
           )
           .save();
         
-        // Debugging info - Limelight JSON results kontrol
         var results = ll.getLatestResults();
         boolean hasJsonResults = results.isPresent();
         SmartDashboard.putBoolean("Vision/HasJsonResults", hasJsonResults);
         
+        boolean hasTarget = ll.getData().targetData.getTargetStatus();
+        SmartDashboard.putBoolean("Vision/HasTarget", hasTarget);
+        SmartDashboard.putNumber("Vision/TargetID", ll.getData().targetData.getAprilTagID());
+        
         if (hasJsonResults) {
             var r = results.get();
-            SmartDashboard.putNumber("Vision/FiducialCount", r.targets_Fiducials != null ? r.targets_Fiducials.length : 0);
+            int fiducialCount = (r.targets_Fiducials != null) ? r.targets_Fiducials.length : 0;
+            SmartDashboard.putNumber("Vision/FiducialCount", fiducialCount);
+            SmartDashboard.putBoolean("Vision/ValidTarget", r.valid);
         }
 
-    // Pose Estimate alma (MegaTag2) - use alliance-aware estimate when possible
-    Optional<PoseEstimate> visionEstimate = estimator.getAlliancePoseEstimate();
+    boolean isRedAlliance = DriverStation.getAlliance()
+        .map(alliance -> alliance == Alliance.Red)
+        .orElse(false);
+    SmartDashboard.putBoolean("Vision/IsRedAlliance", isRedAlliance);
+
+    Optional<PoseEstimate> visionEstimate = BotPose.BLUE_MEGATAG2.get(limelightRight);
         
     SmartDashboard.putBoolean("Vision/HasPose", visionEstimate.isPresent());
         
@@ -121,18 +126,55 @@ public class Vision {
             SmartDashboard.putBoolean("Vision/PoseHasData", pe.hasData);
             SmartDashboard.putNumber("Vision/TagCount", pe.tagCount);
             SmartDashboard.putNumber("Vision/AvgTagDist", pe.avgTagDist);
-            SmartDashboard.putString("Vision/PoseX", String.format("%.2f", pe.pose.getX()));
-            SmartDashboard.putString("Vision/PoseY", String.format("%.2f", pe.pose.getY()));
+            SmartDashboard.putNumber("Vision/PoseX", pe.pose.getX());
+            SmartDashboard.putNumber("Vision/PoseY", pe.pose.getY());
+            SmartDashboard.putNumber("Vision/PoseZ", pe.pose.getZ());
+        } else {
+            SmartDashboard.putBoolean("Vision/PoseHasData", false);
+            SmartDashboard.putNumber("Vision/TagCount", 0);
         }
 
         visionEstimate.ifPresent(poseEstimate -> {
-            // Sadece veri varsa ekle
+            // Sadece veri varsa ve güvenilir ise ekle
             if (poseEstimate.hasData && poseEstimate.tagCount > 0) {
+                
+                // Filtreleme - çok uzak ölçümleri reddet
+                if (poseEstimate.avgTagDist > 4.0) {
+                    return; // Çok uzak, güvenilmez
+                }
+                
+                // Robot hareket halindeyken vision'a daha az güven
+                double speed = Math.hypot(swerve.getVelocity().vxMetersPerSecond, 
+                                          swerve.getVelocity().vyMetersPerSecond);
+                
+                // Temel standart sapma - DAHA YÜKSEK değerler = daha az titreme
+                // Odometry'ye daha çok güven, vision'a daha az
+                double baseXYStdDev = 0.7; // Temel güven (metre) - arttırıldı
+                double baseThetaStdDev = 0.9; // Temel açı güveni (radyan) - arttırıldı
+                
+                // Mesafe faktörü - uzaklaştıkça güven azalır
+                double distanceFactor = 1.0 + (poseEstimate.avgTagDist * 0.5);
+                
+                // Hareket faktörü - hareket halinde güven azalır
+                double movementFactor = 1.0 + speed * 0.8;
+                
+                // Tek tag görüyorsak güveni azalt (daha yüksek stddev)
+                double tagCountFactor = (poseEstimate.tagCount == 1) ? 1.5 : 1.0;
+                
+                double xyStdDev = baseXYStdDev * distanceFactor * movementFactor * tagCountFactor;
+                double thetaStdDev = baseThetaStdDev * distanceFactor * movementFactor * tagCountFactor;
+                
+                // Minimum ve maksimum sınırlar - minimum arttırıldı
+                xyStdDev = Math.max(0.5, Math.min(xyStdDev, 5.0));
+                thetaStdDev = Math.max(0.3, Math.min(thetaStdDev, 3.0));
+                
+                SmartDashboard.putNumber("Vision/StdDevXY", xyStdDev);
+                
                 // Pose verisini swerve odometrysine ekle
                 swerve.addVisionMeasurement(
                     poseEstimate.pose.toPose2d(), 
                     poseEstimate.timestampSeconds,
-                    null // Standart sapmalar varsayilan
+                    edu.wpi.first.math.VecBuilder.fill(xyStdDev, xyStdDev, thetaStdDev)
                 );
                 
                 // AdvantageScope icin vision pose yayinla
