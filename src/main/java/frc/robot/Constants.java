@@ -9,6 +9,9 @@ public final class Constants {
 
     public static final int FEEDER_MOTOR_ID = 42;
     public static final int INTAKE_LAUNCHER_MOTOR_ID = 41;
+    public static final int BICER_DOVER = 43;
+
+    public static final int INDIRIR_DOVER = 44;
 
     public static final int FEEDER_MOTOR_CURRENT_LIMIT = 60;
     public static final int LAUNCHER_MOTOR_CURRENT_LIMIT = 60;
