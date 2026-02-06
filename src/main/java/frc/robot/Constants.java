@@ -35,11 +35,6 @@ public final class Constants {
   public static final double MAX_VELOCITY = 2.0;
   public static final double MAX_ANGULAR_VELOCITY = 120.0;
 
-  public static final class DrivebaseConstants {
-
-    public static final double WHEEL_LOCK_TIME = 10;
-  }
-
   public static class OperatorConstants {
 
     public static final double DEADBAND = 0.08;

@@ -13,6 +13,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -236,6 +237,23 @@ public class Swerve extends SubsystemBase {
 
   public Rotation2d getHeading() {
     return getPose().getRotation();
+  }
+
+  /**
+   * Gets the raw gyro yaw (not from odometry).
+   * This is more reliable for vision pose estimation.
+   * @return The gyro yaw as Rotation2d
+   */
+  public Rotation2d getGyroYaw() {
+    return swerveDrive.getYaw();
+  }
+
+  /**
+   * Gets the gyro rotation as Rotation3d for vision.
+   * @return Rotation3d with roll=0, pitch=0, yaw from gyro
+   */
+  public Rotation3d getGyroRotation3d() {
+    return new Rotation3d(0, 0, swerveDrive.getYaw().getRadians());
   }
 
   public ChassisSpeeds getVelocity() {
