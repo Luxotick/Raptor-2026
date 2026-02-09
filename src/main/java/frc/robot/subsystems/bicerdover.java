@@ -1,51 +1,150 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
-
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.FuelConstants;
 
 public class bicerdover extends SubsystemBase {
-    private final SparkMax bicerdover_motor = new SparkMax(Constants.FuelConstants.BICER_DOVER, SparkMax.MotorType.kBrushless);
-    private final SparkMax indirirdover_motor = new SparkMax(Constants.FuelConstants.INDIRIR_DOVER, SparkMax.MotorType.kBrushless);
+    private final SparkMax bicerdover_motor;
+    private final SparkMax indirirdover_motor;
+
+    // PID controller - class level field, state korunur
+    private final PIDController indirirdoverPID;
+
+    // Indirirdover PID durumu
+    private boolean indirirdoverPIDEnabled = false;
 
     public bicerdover() {
-        SmartDashboard.putNumber("Bicerdover Encoder", bicerdover_motor.getAbsoluteEncoder().getPosition());
-        SmartDashboard.putNumber("Indirirdover Encoder", indirirdover_motor.getAbsoluteEncoder().getPosition());
+        bicerdover_motor = new SparkMax(FuelConstants.BICER_DOVER, SparkMax.MotorType.kBrushless);
+        indirirdover_motor = new SparkMax(FuelConstants.INDIRIR_DOVER, SparkMax.MotorType.kBrushless);
 
+        // Motor konfigürasyonları
         SparkMaxConfig bicerdoverConfig = new SparkMaxConfig();
         bicerdoverConfig.smartCurrentLimit(40);
-        bicerdover_motor.configure(bicerdoverConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+        bicerdover_motor.configure(bicerdoverConfig,
+                com.revrobotics.ResetMode.kResetSafeParameters,
+                com.revrobotics.PersistMode.kPersistParameters);
 
         SparkMaxConfig indirirdoverConfig = new SparkMaxConfig();
         indirirdoverConfig.smartCurrentLimit(40);
-        indirirdover_motor.configure(indirirdoverConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+        indirirdover_motor.configure(indirirdoverConfig,
+                com.revrobotics.ResetMode.kResetSafeParameters,
+                com.revrobotics.PersistMode.kPersistParameters);
+
+        // PID başlat - güvenli kazançlar
+        indirirdoverPID = new PIDController(
+                FuelConstants.INDIRIRDOVER_KP,
+                FuelConstants.INDIRIRDOVER_KI,
+                FuelConstants.INDIRIRDOVER_KD);
+        indirirdoverPID.setTolerance(0.02); // 0.02 rotasyon tolerans
+
+        // SmartDashboard'dan PID ayarları yapmak için
+        SmartDashboard.putNumber("Indirirdover kP", FuelConstants.INDIRIRDOVER_KP);
+        SmartDashboard.putNumber("Indirirdover kI", FuelConstants.INDIRIRDOVER_KI);
+        SmartDashboard.putNumber("Indirirdover kD", FuelConstants.INDIRIRDOVER_KD);
+        SmartDashboard.putNumber("Indirirdover Up Pos", FuelConstants.INDIRIRDOVER_UP_POSITION);
     }
 
-    public void bicerdover_up() {
-        bicerdover_motor.setVoltage(5.0);
+    // --- Bicerdover (döner mekanizma) ---
+
+    public void bicerdoverRun() {
+        bicerdover_motor.setVoltage(FuelConstants.BICERDOVER_RUN_VOLTAGE);
     }
 
-    public void bicerdover_down() {
-        bicerdover_motor.setVoltage(-5.0);
+    public void bicerdoverStop() {
+        bicerdover_motor.setVoltage(0);
     }
 
-    public void indirirdover_up() {
-        try (PIDController indirirdover_pid = new PIDController(1, 0, 0)) {
+    // --- Indirirdover (pozisyon kontrollü) ---
 
-            indirirdover_pid.setSetpoint(90);
-            while (indirirdover_motor.getAbsoluteEncoder().getPosition() < 90) {
-                double output = indirirdover_pid.calculate(indirirdover_motor.getAbsoluteEncoder().getPosition());
-                indirirdover_motor.setVoltage(output);
-            }
+    /**
+     * Indirirdover'ı hedef pozisyona PID ile gönderir.
+     * Absolute encoder rotasyon cinsinden (0-1 arası) çalışır.
+     */
+    public void setIndirirdoverTarget(double position) {
+        // SmartDashboard'dan güncel PID değerlerini oku (canlı tuning için)
+        indirirdoverPID.setPID(
+                SmartDashboard.getNumber("Indirirdover kP", FuelConstants.INDIRIRDOVER_KP),
+                SmartDashboard.getNumber("Indirirdover kI", FuelConstants.INDIRIRDOVER_KI),
+                SmartDashboard.getNumber("Indirirdover kD", FuelConstants.INDIRIRDOVER_KD));
+        indirirdoverPID.setSetpoint(position);
+        indirirdoverPIDEnabled = true;
+    }
 
-            indirirdover_pid.setSetpoint(0);
-            double output = indirirdover_pid.calculate(indirirdover_motor.getAbsoluteEncoder().getPosition());
+    public void stopIndirirdover() {
+        indirirdoverPIDEnabled = false;
+        indirirdover_motor.setVoltage(0);
+    }
+
+    public void stopAll() {
+        bicerdoverStop();
+        stopIndirirdover();
+    }
+
+    public boolean isIndirirdoverAtTarget() {
+        return indirirdoverPID.atSetpoint();
+    }
+
+    // --- Command'lar ---
+
+    /**
+     * A tuşu ile çalışacak tam intake komutu:
+     * indirirdover UP pozisyonuna gider + bicerdover döner.
+     * Buton bırakıldığında her şey durur.
+     */
+    public Command fullIntakeCommand() {
+        return this.runEnd(
+                () -> {
+                    setIndirirdoverTarget(
+                            SmartDashboard.getNumber("Indirirdover Up Pos",
+                                    FuelConstants.INDIRIRDOVER_UP_POSITION));
+                    bicerdoverRun();
+                },
+                () -> stopAll());
+    }
+
+    /** Sadece indirirdover up komutu */
+    public Command indirirdoverUpCommand() {
+        return this.runEnd(
+                () -> setIndirirdoverTarget(FuelConstants.INDIRIRDOVER_UP_POSITION),
+                () -> stopIndirirdover());
+    }
+
+    /** Sadece bicerdover çalıştırma komutu */
+    public Command bicerdoverRunCommand() {
+        return this.runEnd(
+                () -> bicerdoverRun(),
+                () -> bicerdoverStop());
+    }
+
+    @Override
+    public void periodic() {
+        // PID döngüsü burada çalışır - HER 20ms'de bir, robot'u KİLİTLEMEDEN
+        if (indirirdoverPIDEnabled) {
+            double currentPosition = indirirdover_motor.getAbsoluteEncoder().getPosition();
+            double output = indirirdoverPID.calculate(currentPosition);
+            // Çıkışı güvenli aralığa sınırla
+            output = MathUtil.clamp(output,
+                    -FuelConstants.INDIRIRDOVER_MAX_VOLTAGE,
+                    FuelConstants.INDIRIRDOVER_MAX_VOLTAGE);
             indirirdover_motor.setVoltage(output);
         }
+
+        // Telemetri
+        SmartDashboard.putNumber("Bicerdover Encoder",
+                bicerdover_motor.getAbsoluteEncoder().getPosition());
+        SmartDashboard.putNumber("Indirirdover Encoder",
+                indirirdover_motor.getAbsoluteEncoder().getPosition());
+        SmartDashboard.putNumber("Indirirdover Target",
+                indirirdoverPID.getSetpoint());
+        SmartDashboard.putBoolean("Indirirdover At Target",
+                isIndirirdoverAtTarget());
     }
-    
 }

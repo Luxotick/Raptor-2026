@@ -14,12 +14,14 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.swerve.Swerve;
 import swervelib.SwerveInputStream;
 import frc.robot.subsystems.CANFuelSubsystem;
+import frc.robot.subsystems.bicerdover;
 import frc.robot.util.Vision;
 
 public class RobotContainer {
   final CommandXboxController joystick = new CommandXboxController(0);
 
   private final CANFuelSubsystem ballSubsystem = new CANFuelSubsystem();
+  private final bicerdover bicerdoverSubsystem = new bicerdover();
 
 
   public final Swerve swerve = Swerve.getInstance();
@@ -48,10 +50,13 @@ public class RobotContainer {
         .whileTrue((ballSubsystem.launchCommand())
             .finallyDo(() -> ballSubsystem.stop()));
             
-    // While the A button is held on the operator controller, eject fuel back out
-    // the intake
+    // A tuşu basılı tutulduğunda: indirirdover UP + bicerdover çalışır + intake çalışır
+    // Her iki subsystem paralel çalışır, buton bırakıldığında her şey durur
     joystick.a()
-        .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.eject(), () -> ballSubsystem.stop()));
+        .whileTrue(Commands.parallel(
+            bicerdoverSubsystem.fullIntakeCommand(),
+            ballSubsystem.runEnd(() -> ballSubsystem.intake(), () -> ballSubsystem.stop())
+        ));
 
     SwerveInputStream driveAngularVelocity =
         SwerveInputStream.of(

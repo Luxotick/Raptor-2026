@@ -23,6 +23,21 @@ public final class Constants {
     public static final double SPIN_UP_FEEDER_VOLTAGE = 6;
     public static final double SPIN_UP_SECONDS = 1;
 
+    // Bicerdover motor voltajı
+    public static final double BICERDOVER_RUN_VOLTAGE = 5.0;
+
+    // Indirirdover PID kazançları - güvenli başlangıç değerleri
+    // Absolute encoder 0-1 rotasyon döndürür, voltaj çıkışlı PID
+    public static final double INDIRIRDOVER_KP = 4.0;   // Konservatif P kazancı
+    public static final double INDIRIRDOVER_KI = 0.0;   // I kazancı (başlangıçta 0, gerekirse ekle)
+    public static final double INDIRIRDOVER_KD = 0.1;   // D kazancı - osilasyonu azaltır
+    public static final double INDIRIRDOVER_MAX_VOLTAGE = 6.0; // Güvenlik sınırı
+
+    // Indirirdover pozisyonları (rotasyon cinsinden, 0-1 arası)
+    // !! MEKANİZMANIZA GÖRE AYARLAYIN - encoder değerlerini SmartDashboard'dan okuyun !!
+    public static final double INDIRIRDOVER_UP_POSITION = 0.25;
+    public static final double INDIRIRDOVER_DOWN_POSITION = 0.0;
+
     //public static final double INTAKING_FEEDER_VOLTAGE = -12;
     //public static final double INTAKING_INTAKE_VOLTAGE = 10;
     //public static final double LAUNCHING_FEEDER_VOLTAGE = 9;
