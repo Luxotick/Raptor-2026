@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.SparkMax;
+
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -30,6 +32,19 @@ public class Robot extends TimedRobot {
     robotContainer.vision.updatePoseEstimation();
 
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+
+    // Also publish some important encoder/telemetry values from subsystems
+    // here so they're visible even when teleop/commands are not actively
+    // running. Uses the accessor added in RobotContainer.
+    try {
+      SmartDashboard.putNumber("Bicerdover Encoder (robotPeriodic)",
+          robotContainer.getBicerdoverSubsystem().getBicerdoverEncoderPosition());
+      SmartDashboard.putNumber("Indirirdover Encoder (robotPeriodic)",
+          robotContainer.getBicerdoverSubsystem().getIndirirdoverEncoderPosition());
+    } catch (Exception e) {
+      // Don't let telemetry failure stop the scheduler; log if needed.
+      // (Avoids exceptions during early init before subsystems are ready.)
+    }
   }
 
   @Override
@@ -75,8 +90,19 @@ public class Robot extends TimedRobot {
 
   }
 
+
+
+
+
+
+
+
+
+
+
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
   public void testInit() {

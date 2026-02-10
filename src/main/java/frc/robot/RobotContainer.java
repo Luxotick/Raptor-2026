@@ -40,6 +40,12 @@ public class RobotContainer {
     configureBindings();
   }
 
+  // Expose the bicerdover subsystem so Robot (or other managers) can read
+  // encoder values / state even when commands aren't actively running.
+  public bicerdover getBicerdoverSubsystem() {
+    return bicerdoverSubsystem;
+  }
+
   private void configureBindings() {
 
     joystick.leftBumper()
@@ -55,8 +61,12 @@ public class RobotContainer {
     joystick.a()
         .whileTrue(Commands.parallel(
             bicerdoverSubsystem.fullIntakeCommand(),
-            ballSubsystem.runEnd(() -> ballSubsystem.intake(), () -> ballSubsystem.stop())
+            ballSubsystem.runEnd(() -> ballSubsystem.eject(), () -> ballSubsystem.stop())
         ));
+
+    // B tuşu basılı tutulduğunda: donmedolap (ID 45) yavaş döner
+    joystick.b()
+        .whileTrue(bicerdoverSubsystem.donmedolapSlowCommand());
 
     SwerveInputStream driveAngularVelocity =
         SwerveInputStream.of(

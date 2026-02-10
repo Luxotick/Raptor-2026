@@ -8,12 +8,12 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.FuelConstants;
 
 public class bicerdover extends SubsystemBase {
     private final SparkMax bicerdover_motor;
     private final SparkMax indirirdover_motor;
+    private final SparkMax donmedolap;
 
     // PID controller - class level field, state korunur
     private final PIDController indirirdoverPID;
@@ -24,6 +24,7 @@ public class bicerdover extends SubsystemBase {
     public bicerdover() {
         bicerdover_motor = new SparkMax(FuelConstants.BICER_DOVER, SparkMax.MotorType.kBrushless);
         indirirdover_motor = new SparkMax(FuelConstants.INDIRIR_DOVER, SparkMax.MotorType.kBrushless);
+        donmedolap = new SparkMax(FuelConstants.DONME_DOLAP, SparkMax.MotorType.kBrushless);
 
         // Motor konfigürasyonları
         SparkMaxConfig bicerdoverConfig = new SparkMaxConfig();
@@ -35,6 +36,13 @@ public class bicerdover extends SubsystemBase {
         SparkMaxConfig indirirdoverConfig = new SparkMaxConfig();
         indirirdoverConfig.smartCurrentLimit(40);
         indirirdover_motor.configure(indirirdoverConfig,
+                com.revrobotics.ResetMode.kResetSafeParameters,
+                com.revrobotics.PersistMode.kPersistParameters);
+
+        // Donmedolap motor konfigürasyonu
+        SparkMaxConfig donmedolapConfig = new SparkMaxConfig();
+        donmedolapConfig.smartCurrentLimit(40);
+        donmedolap.configure(donmedolapConfig,
                 com.revrobotics.ResetMode.kResetSafeParameters,
                 com.revrobotics.PersistMode.kPersistParameters);
 
@@ -50,6 +58,21 @@ public class bicerdover extends SubsystemBase {
         SmartDashboard.putNumber("Indirirdover kI", FuelConstants.INDIRIRDOVER_KI);
         SmartDashboard.putNumber("Indirirdover kD", FuelConstants.INDIRIRDOVER_KD);
         SmartDashboard.putNumber("Indirirdover Up Pos", FuelConstants.INDIRIRDOVER_UP_POSITION);
+    }
+
+    public void donmedolapRun(){
+        donmedolap.setVoltage(FuelConstants.DONMEDOLAP_SLOW_VOLTAGE);
+    }
+
+    public void donmedolapStop(){
+        donmedolap.setVoltage(0);
+    }
+
+    /** B tuşu ile çalışacak - donmedolap yavaş döner */
+    public Command donmedolapSlowCommand() {
+        return this.runEnd(
+                () -> donmedolapRun(),
+                () -> donmedolapStop());
     }
 
     // --- Bicerdover (döner mekanizma) ---
@@ -81,6 +104,17 @@ public class bicerdover extends SubsystemBase {
     public void stopIndirirdover() {
         indirirdoverPIDEnabled = false;
         indirirdover_motor.setVoltage(0);
+    }
+
+    // Public getters so other parts of the robot (e.g., Robot.robotPeriodic)
+    // can read encoder positions even if commands aren't running.
+    public double getBicerdoverEncoderPosition() {
+        return bicerdover_motor.getEncoder().getPosition();
+    }
+
+    public double getIndirirdoverEncoderPosition() {
+        System.out.println(indirirdover_motor.getEncoder().getPosition());
+        return indirirdover_motor.getEncoder().getPosition();
     }
 
     public void stopAll() {
@@ -128,7 +162,7 @@ public class bicerdover extends SubsystemBase {
     public void periodic() {
         // PID döngüsü burada çalışır - HER 20ms'de bir, robot'u KİLİTLEMEDEN
         if (indirirdoverPIDEnabled) {
-            double currentPosition = indirirdover_motor.getAbsoluteEncoder().getPosition();
+            double currentPosition = indirirdover_motor.getEncoder().getPosition();
             double output = indirirdoverPID.calculate(currentPosition);
             // Çıkışı güvenli aralığa sınırla
             output = MathUtil.clamp(output,

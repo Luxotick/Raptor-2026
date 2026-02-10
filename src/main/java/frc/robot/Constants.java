@@ -12,6 +12,7 @@ public final class Constants {
     public static final int BICER_DOVER = 43;
 
     public static final int INDIRIR_DOVER = 44;
+    public static final int DONME_DOLAP = 45;
 
     public static final int FEEDER_MOTOR_CURRENT_LIMIT = 60;
     public static final int LAUNCHER_MOTOR_CURRENT_LIMIT = 60;
@@ -25,6 +26,9 @@ public final class Constants {
 
     // Bicerdover motor voltajı
     public static final double BICERDOVER_RUN_VOLTAGE = 5.0;
+    
+    // Donmedolap motor voltajı (yavaş hız)
+    public static final double DONMEDOLAP_SLOW_VOLTAGE = 2.0;
 
     // Indirirdover PID kazançları - güvenli başlangıç değerleri
     // Absolute encoder 0-1 rotasyon döndürür, voltaj çıkışlı PID
@@ -35,8 +39,8 @@ public final class Constants {
 
     // Indirirdover pozisyonları (rotasyon cinsinden, 0-1 arası)
     // !! MEKANİZMANIZA GÖRE AYARLAYIN - encoder değerlerini SmartDashboard'dan okuyun !!
-    public static final double INDIRIRDOVER_UP_POSITION = 0.25;
-    public static final double INDIRIRDOVER_DOWN_POSITION = 0.0;
+    public static final double INDIRIRDOVER_UP_POSITION = 8;
+    public static final double INDIRIRDOVER_DOWN_POSITION = 0.5;
 
     //public static final double INTAKING_FEEDER_VOLTAGE = -12;
     //public static final double INTAKING_INTAKE_VOLTAGE = 10;
