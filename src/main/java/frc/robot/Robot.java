@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import com.revrobotics.spark.SparkMax;
-
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -59,7 +57,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     DataLogManager.log("Starting Auto!");
 
-    // swerve.zeroGyro();
+    swerve.zeroGyro();
 
     autonomousCommand = robotContainer.getAutonomousCommand();
 

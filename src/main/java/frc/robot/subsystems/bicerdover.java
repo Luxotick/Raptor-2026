@@ -113,7 +113,6 @@ public class bicerdover extends SubsystemBase {
     }
 
     public double getIndirirdoverEncoderPosition() {
-        System.out.println(indirirdover_motor.getEncoder().getPosition());
         return indirirdover_motor.getEncoder().getPosition();
     }
 
