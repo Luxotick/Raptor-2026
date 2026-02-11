@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,7 +16,8 @@ import frc.robot.subsystems.swerve.Swerve;
 import swervelib.SwerveInputStream;
 import frc.robot.subsystems.CANFuelSubsystem;
 import frc.robot.subsystems.bicerdover;
-import frc.robot.util.Vision;
+// Vision şimdilik devre dışı
+// import frc.robot.util.Vision;
 
 public class RobotContainer {
   final CommandXboxController joystick = new CommandXboxController(0);
@@ -25,7 +27,8 @@ public class RobotContainer {
 
 
   public final Swerve swerve = Swerve.getInstance();
-  public final Vision vision = new Vision(swerve);
+  // Vision şimdilik devre dışı - NavX2 heading kullanılıyor
+  // public final Vision vision = new Vision(swerve);
   // public final Climb climb = Climb.getInstance();
 
   public final Telemetry logger = new Telemetry();
@@ -33,6 +36,19 @@ public class RobotContainer {
 
 
   public RobotContainer() {
+
+    // PathPlanner NamedCommands kayıtları - autoChooser'dan ÖNCE yapılmalı
+    // "launchWithDonmedolap": launch + dönme dolabı paralel, 10 saniye süre sınırı
+    NamedCommands.registerCommand("launchWithDonmedolap",
+        Commands.parallel(
+            ballSubsystem.launchCommand(),
+            bicerdoverSubsystem.donmedolapSlowCommand()
+        ).withTimeout(10)
+         .finallyDo(() -> {
+            ballSubsystem.stop();
+            bicerdoverSubsystem.donmedolapStop();
+         })
+    );
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Mode", autoChooser);

@@ -103,6 +103,10 @@ public class Swerve extends SubsystemBase {
     drivePose.set(getPose());
     drivePoseLog.append(getPose());
     field.setRobotPose(getPose());
+
+    // Debug: gyro heading'i SmartDashboard'a yazdır
+    SmartDashboard.putNumber("Gyro/Yaw", swerveDrive.getYaw().getDegrees());
+    SmartDashboard.putNumber("Gyro/OdometryHeading", swerveDrive.getOdometryHeading().getDegrees());
   }
 
   public Alliance getAlliance() {

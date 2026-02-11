@@ -28,7 +28,7 @@ public final class Constants {
     public static final double BICERDOVER_RUN_VOLTAGE = 5.0;
     
     // Donmedolap motor voltajı (yavaş hız)
-    public static final double DONMEDOLAP_SLOW_VOLTAGE = 2.0;
+    public static final double DONMEDOLAP_SLOW_VOLTAGE = 10.0;
 
     // Indirirdover PID kazançları - güvenli başlangıç değerleri
     // Absolute encoder 0-1 rotasyon döndürür, voltaj çıkışlı PID
@@ -38,7 +38,6 @@ public final class Constants {
     public static final double INDIRIRDOVER_MAX_VOLTAGE = 6.0; // Güvenlik sınırı
 
     // Indirirdover pozisyonları (rotasyon cinsinden, 0-1 arası)
-    // !! MEKANİZMANIZA GÖRE AYARLAYIN - encoder değerlerini SmartDashboard'dan okuyun !!
     public static final double INDIRIRDOVER_UP_POSITION = 8;
     public static final double INDIRIRDOVER_DOWN_POSITION = 0.5;
 
