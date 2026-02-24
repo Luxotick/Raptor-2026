@@ -16,6 +16,7 @@ import frc.robot.subsystems.swerve.Swerve;
 import swervelib.SwerveInputStream;
 import frc.robot.subsystems.CANFuelSubsystem;
 import frc.robot.subsystems.bicerdover;
+import frc.robot.subsystems.kaldirirdover;
 // Vision şimdilik devre dışı
 // import frc.robot.util.Vision;
 
@@ -24,7 +25,7 @@ public class RobotContainer {
 
   private final CANFuelSubsystem ballSubsystem = new CANFuelSubsystem();
   private final bicerdover bicerdoverSubsystem = new bicerdover();
-
+  private final kaldirirdover kaldirirdoverSubsystem = new kaldirirdover();
 
   public final Swerve swerve = Swerve.getInstance();
   // Vision şimdilik devre dışı - NavX2 heading kullanılıyor
@@ -47,6 +48,16 @@ public class RobotContainer {
          .finallyDo(() -> {
             ballSubsystem.stop();
             bicerdoverSubsystem.donmedolapStop();
+         })
+    );
+
+    NamedCommands.registerCommand("asilma",
+        Commands.parallel(
+            kaldirirdoverSubsystem.yukariCommand().withTimeout(3),
+            kaldirirdoverSubsystem.asagiCommand().withTimeout(2)
+        ).withTimeout(7)
+         .finallyDo(() -> {
+            kaldirirdoverSubsystem.stop();
          })
     );
   
@@ -72,6 +83,10 @@ public class RobotContainer {
     joystick.rightBumper()
         .whileTrue((ballSubsystem.launchCommand())
             .finallyDo(() -> ballSubsystem.stop()));
+
+    joystick.rightTrigger()
+        .whileTrue((kaldirirdoverSubsystem.yukariCommand())
+            .finallyDo(() -> kaldirirdoverSubsystem.stopCommand()));
             
     // A tuşu basılı tutulduğunda: indirirdover UP + bicerdover çalışır + intake çalışır
     // Her iki subsystem paralel çalışır, buton bırakıldığında her şey durur

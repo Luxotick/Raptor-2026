@@ -14,6 +14,8 @@ public final class Constants {
     public static final int INDIRIR_DOVER = 44;
     public static final int DONME_DOLAP = 45;
 
+    public static final int KALDIRIR_DOVER = 46;
+
     public static final int FEEDER_MOTOR_CURRENT_LIMIT = 60;
     public static final int LAUNCHER_MOTOR_CURRENT_LIMIT = 60;
 
