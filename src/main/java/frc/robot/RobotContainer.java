@@ -43,12 +43,13 @@ public class RobotContainer {
         Commands.parallel(
             ballSubsystem.launchCommand(),
             bicerdoverSubsystem.donmedolapSlowCommand()
-        ).withTimeout(10)
+        ).withTimeout(7)
          .finallyDo(() -> {
             ballSubsystem.stop();
             bicerdoverSubsystem.donmedolapStop();
          })
     );
+  
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Mode", autoChooser);
@@ -83,6 +84,9 @@ public class RobotContainer {
     // B tuşu basılı tutulduğunda: donmedolap (ID 45) yavaş döner
     joystick.b()
         .whileTrue(bicerdoverSubsystem.donmedolapSlowCommand());
+
+    joystick.y()
+        .whileTrue(bicerdoverSubsystem.donmedolapReverseCommand());
 
     SwerveInputStream driveAngularVelocity =
         SwerveInputStream.of(

@@ -7,19 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New Path"
+            "pathName": "New New Path"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Copy of New New Path"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "launchWithDonmedolap"
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": []
           }
         }
       ]

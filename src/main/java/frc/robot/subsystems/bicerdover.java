@@ -64,6 +64,11 @@ public class bicerdover extends SubsystemBase {
         donmedolap.setVoltage(FuelConstants.DONMEDOLAP_SLOW_VOLTAGE);
     }
 
+    public void donmeDolapReverseRun(){
+        donmedolap.setVoltage(FuelConstants.DONMEDOLAP_REVERSE_VOLTAGE);
+    }
+
+
     public void donmedolapStop(){
         donmedolap.setVoltage(0);
     }
@@ -72,6 +77,12 @@ public class bicerdover extends SubsystemBase {
     public Command donmedolapSlowCommand() {
         return this.runEnd(
                 () -> donmedolapRun(),
+                () -> donmedolapStop());
+    }
+
+    public Command donmedolapReverseCommand() {
+        return this.runEnd(
+                () -> donmeDolapReverseRun(),
                 () -> donmedolapStop());
     }
 
