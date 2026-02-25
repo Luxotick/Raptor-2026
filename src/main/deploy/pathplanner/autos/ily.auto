@@ -5,9 +5,21 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "test1"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "launchWithDonmedolap"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "test"
           }
         }
       ]

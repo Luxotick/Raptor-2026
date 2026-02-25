@@ -44,7 +44,7 @@ public class RobotContainer {
         Commands.parallel(
             ballSubsystem.launchCommand(),
             bicerdoverSubsystem.donmedolapSlowCommand()
-        ).withTimeout(7)
+        ).withTimeout(5)
          .finallyDo(() -> {
             ballSubsystem.stop();
             bicerdoverSubsystem.donmedolapStop();

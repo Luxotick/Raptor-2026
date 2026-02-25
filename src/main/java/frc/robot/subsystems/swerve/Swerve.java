@@ -40,9 +40,10 @@ import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Swerve extends SubsystemBase {
 
@@ -87,7 +88,7 @@ public class Swerve extends SubsystemBase {
     configureAutoBuilder();
 
     SmartDashboard.putData("Field", field);
-    // RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyro)); TODO
+    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyro)); //TODO
   }
 
   @Override
