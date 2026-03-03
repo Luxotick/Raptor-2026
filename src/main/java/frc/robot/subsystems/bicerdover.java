@@ -31,7 +31,7 @@ public class bicerdover extends SubsystemBase {
         bicerdoverConfig.smartCurrentLimit(40);
         bicerdover_motor.configure(bicerdoverConfig,
                 com.revrobotics.ResetMode.kResetSafeParameters,
-                com.revrobotics.PersistMode.kPersistParameters);
+                com.revrobotics.PersistMode.kPersistParameters); 
 
         SparkMaxConfig indirirdoverConfig = new SparkMaxConfig();
         indirirdoverConfig.smartCurrentLimit(40);

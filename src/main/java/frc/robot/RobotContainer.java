@@ -25,7 +25,7 @@ public class RobotContainer {
 
   private final CANFuelSubsystem ballSubsystem = new CANFuelSubsystem();
   private final bicerdover bicerdoverSubsystem = new bicerdover();
-  private final kaldirirdover kaldirirdoverSubsystem = new kaldirirdover();
+  //private final kaldirirdover kaldirirdoverSubsystem = new kaldirirdover();
 
   public final Swerve swerve = Swerve.getInstance();
   // Vision şimdilik devre dışı - NavX2 heading kullanılıyor
@@ -50,7 +50,7 @@ public class RobotContainer {
             bicerdoverSubsystem.donmedolapStop();
          })
     );
-
+    /*
     NamedCommands.registerCommand("asilma",
         Commands.parallel(
             kaldirirdoverSubsystem.yukariCommand().withTimeout(3),
@@ -60,7 +60,7 @@ public class RobotContainer {
             kaldirirdoverSubsystem.stop();
          })
     );
-  
+   */
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Mode", autoChooser);
@@ -84,10 +84,11 @@ public class RobotContainer {
         .whileTrue((ballSubsystem.launchCommand())
             .finallyDo(() -> ballSubsystem.stop()));
 
+    /* 
     joystick.rightTrigger()
         .whileTrue((kaldirirdoverSubsystem.yukariCommand())
             .finallyDo(() -> kaldirirdoverSubsystem.stopCommand()));
-            
+            */
     // A tuşu basılı tutulduğunda: indirirdover UP + bicerdover çalışır + intake çalışır
     // Her iki subsystem paralel çalışır, buton bırakıldığında her şey durur
     joystick.a()
