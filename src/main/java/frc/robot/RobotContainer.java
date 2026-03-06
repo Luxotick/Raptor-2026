@@ -52,15 +52,14 @@ public class RobotContainer {
     );
     
     NamedCommands.registerCommand("asilma",
-        Commands.parallel(
-            kaldirirdoverSubsystem.yukariCommand().withTimeout(3),
+        Commands.sequence(
+            kaldirirdoverSubsystem.yukariCommand().withTimeout(3),      
             kaldirirdoverSubsystem.asagiCommand().withTimeout(2)
-        ).withTimeout(7)
-         .finallyDo(() -> {
+        ).finallyDo(() -> {
             kaldirirdoverSubsystem.stop();
-         })
+        })
     );
-   
+    
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Mode", autoChooser);
@@ -85,13 +84,13 @@ public class RobotContainer {
             .finallyDo(() -> ballSubsystem.stop()));
 
     
-    joystick.rightTrigger()
+    joystick.leftTrigger()
         .whileTrue((kaldirirdoverSubsystem.yukariCommand())
-            .finallyDo(() -> kaldirirdoverSubsystem.stopCommand()));
+            .finallyDo(() -> kaldirirdoverSubsystem.stop()));
 
         joystick.rightTrigger()
         .whileTrue((kaldirirdoverSubsystem.asagiCommand())
-            .finallyDo(() -> kaldirirdoverSubsystem.stopCommand()));
+            .finallyDo(() -> kaldirirdoverSubsystem.stop()));
             
     // A tuşu basılı tutulduğunda: indirirdover UP + bicerdover çalışır + intake çalışır
     // Her iki subsystem paralel çalışır, buton bırakıldığında her şey durur

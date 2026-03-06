@@ -42,10 +42,6 @@ public class kaldirirdover extends SubsystemBase {
         return this.run(() -> asagi());
     }
 
-    public Command stopCommand() {
-        return this.runOnce(() -> kaldirirdover_motor.setVoltage(0)).withName("Kaldirirdover Stop");
-    }
-
      public void stop() {
         kaldirirdover_motor.setVoltage(0);
     }
