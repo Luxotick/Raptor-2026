@@ -27,11 +27,11 @@ public class kaldirirdover extends SubsystemBase {
     }
 
     public void yukari() {
-        kaldirirdover_motor.setVoltage(6.0); // Yukarı hareket için pozitif voltaj
+        kaldirirdover_motor.set(1.0); // Yukarı hareket için pozitif voltaj
     }
 
     public void asagi() {
-        kaldirirdover_motor.setVoltage(-6.0); // Aşağı hareket için negatif voltaj
+        kaldirirdover_motor.set(-1.0); // Aşağı hareket için negatif voltaj
     }
 
     public Command yukariCommand() {
@@ -48,5 +48,9 @@ public class kaldirirdover extends SubsystemBase {
 
      public double getKaldirirdoverEncoderPosition() {
         return kaldirirdover_motor.getEncoder().getPosition();
+    }
+    
+    public void resetEncoderPosition() {
+        kaldirirdover_motor.getEncoder().setPosition(0);
     }
 }

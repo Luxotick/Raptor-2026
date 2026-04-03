@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.kaldirirdover;
 import frc.robot.subsystems.swerve.Swerve;
 
 public class Robot extends TimedRobot {
@@ -38,6 +39,9 @@ public class Robot extends TimedRobot {
     try {
       SmartDashboard.putNumber("Bicerdover Encoder (robotPeriodic)",
           robotContainer.getBicerdoverSubsystem().getBicerdoverEncoderPosition());
+
+      SmartDashboard.putNumber("PORNOOOOOOOOOOOOOOOOOOO Position", robotContainer.getKaldirirdoverSubsystem().getKaldirirdoverEncoderPosition());
+
       SmartDashboard.putNumber("Indirirdover Encoder (robotPeriodic)",
           robotContainer.getBicerdoverSubsystem().getIndirirdoverEncoderPosition());
     } catch (Exception e) {

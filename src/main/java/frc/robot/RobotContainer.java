@@ -6,6 +6,8 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,13 +30,9 @@ public class RobotContainer {
   private final kaldirirdover kaldirirdoverSubsystem = new kaldirirdover();
 
   public final Swerve swerve = Swerve.getInstance();
-  // Vision şimdilik devre dışı - NavX2 heading kullanılıyor
-  // public final Vision vision = new Vision(swerve);
-  // public final Climb climb = Climb.getInstance();
 
   public final Telemetry logger = new Telemetry();
   private final SendableChooser<Command> autoChooser;
-
 
   public RobotContainer() {
 
@@ -53,24 +51,36 @@ public class RobotContainer {
     
     NamedCommands.registerCommand("asilma",
         Commands.sequence(
-            kaldirirdoverSubsystem.yukariCommand().withTimeout(3),      
-            kaldirirdoverSubsystem.asagiCommand().withTimeout(2)
+            kaldirirdoverSubsystem.asagiCommand().withTimeout(5)
         ).finallyDo(() -> {
             kaldirirdoverSubsystem.stop();
         })
     );
     
-
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Mode", autoChooser);
 
     configureBindings();
   }
 
-  // Expose the bicerdover subsystem so Robot (or other managers) can read
-  // encoder values / state even when commands aren't actively running.
   public bicerdover getBicerdoverSubsystem() {
     return bicerdoverSubsystem;
+  }
+
+  public kaldirirdover getKaldirirdoverSubsystem(){
+    return kaldirirdoverSubsystem;
+  }
+
+  public boolean getKaldirirdoverstatement(){
+    double currentPos = kaldirirdoverSubsystem.getKaldirirdoverEncoderPosition();
+    if(currentPos <= 0){
+        System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+        return true;
+        }
+        else{
+            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAa");
+        return false;
+    }
   }
 
   private void configureBindings() {
@@ -84,12 +94,16 @@ public class RobotContainer {
             .finallyDo(() -> ballSubsystem.stop()));
 
     
-    joystick.leftTrigger()
+    joystick.leftTrigger().and(() -> getKaldirirdoverstatement())
         .whileTrue((kaldirirdoverSubsystem.yukariCommand())
             .finallyDo(() -> kaldirirdoverSubsystem.stop()));
 
         joystick.rightTrigger()
         .whileTrue((kaldirirdoverSubsystem.asagiCommand())
+            .finallyDo(() -> kaldirirdoverSubsystem.stop()));
+    
+    joystick.povDown()
+            .whileTrue((kaldirirdoverSubsystem.yukariCommand())
             .finallyDo(() -> kaldirirdoverSubsystem.stop()));
             
     // A tuşu basılı tutulduğunda: indirirdover UP + bicerdover çalışır + intake çalışır
@@ -119,6 +133,7 @@ public class RobotContainer {
     swerve.setDefaultCommand(swerve.driveFieldOriented(driveAngularVelocity));
 
     joystick.povUp().onTrue(Commands.runOnce(swerve::zeroGyro));
+    joystick.povLeft().onTrue(Commands.runOnce(() -> kaldirirdoverSubsystem.resetEncoderPosition()));
   }
 
   public Command getAutonomousCommand() {

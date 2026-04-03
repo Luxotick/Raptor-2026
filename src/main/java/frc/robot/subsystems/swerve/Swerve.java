@@ -40,10 +40,8 @@ import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Swerve extends SubsystemBase {
 
@@ -88,7 +86,7 @@ public class Swerve extends SubsystemBase {
     configureAutoBuilder();
 
     SmartDashboard.putData("Field", field);
-    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyro)); //TODO
+    // Removed zeroGyro on autonomous start, as PathPlanner handles odometry initialization and this breaks 180 deg autos!
   }
 
   @Override
@@ -228,12 +226,16 @@ public class Swerve extends SubsystemBase {
     return swerveDrive.getPose();
   }
 
+  /**
+   * Zeroes the gyro.
+   */
   public void zeroGyro() {
-    swerveDrive.zeroGyro();
+    // Reset the odometry to the current position but with a zero heading
+    swerveDrive.resetOdometry(new Pose2d(swerveDrive.getPose().getTranslation(), new Rotation2d(0)));
+  }
 
-    if (mAlliance == Alliance.Red) {
-      resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(180)));
-    }
+  public void setGyro(Rotation2d angle) {
+    swerveDrive.setGyro(new Rotation3d(0, 0, angle.getRadians()));
   }
 
   public void setMotorBrake(boolean brake) {
