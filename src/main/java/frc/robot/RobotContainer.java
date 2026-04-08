@@ -19,8 +19,6 @@ import swervelib.SwerveInputStream;
 import frc.robot.subsystems.CANFuelSubsystem;
 import frc.robot.subsystems.bicerdover;
 import frc.robot.subsystems.kaldirirdover;
-// Vision şimdilik devre dışı
-// import frc.robot.util.Vision;
 
 public class RobotContainer {
   final CommandXboxController joystick = new CommandXboxController(0);
@@ -74,16 +72,23 @@ public class RobotContainer {
   public boolean getKaldirirdoverstatement(){
     double currentPos = kaldirirdoverSubsystem.getKaldirirdoverEncoderPosition();
     if(currentPos <= 0){
-        System.out.println("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
         return true;
         }
         else{
-            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAa");
         return false;
     }
   }
 
   private void configureBindings() {
+
+    SwerveInputStream intakeAngularVelocity =
+        SwerveInputStream.of(
+                swerve.getSwerveDrive(),
+                () -> joystick.getLeftY() * -0.5,
+                () -> joystick.getLeftX() * -0.5)
+            .withControllerRotationAxis(() -> -joystick.getRightX())
+            .deadband(OperatorConstants.DEADBAND)
+            .allianceRelativeControl(true);
 
     joystick.leftBumper()
         .whileTrue(ballSubsystem.runEnd(() -> ballSubsystem.intake(), () -> ballSubsystem.stop()));
@@ -111,8 +116,14 @@ public class RobotContainer {
     joystick.a()
         .whileTrue(Commands.parallel(
             bicerdoverSubsystem.fullIntakeCommand(),
-            ballSubsystem.runEnd(() -> ballSubsystem.eject(), () -> ballSubsystem.stop())
-        ));
+            ballSubsystem.runEnd(() -> ballSubsystem.eject(), () -> ballSubsystem.stop()),
+            swerve.driveFieldOriented(intakeAngularVelocity)
+    ));
+
+    joystick.x()
+        .whileTrue(Commands.race(
+            bicerdoverSubsystem.indirirdoverDownCommand()
+    ));
 
     // B tuşu basılı tutulduğunda: donmedolap (ID 45) yavaş döner
     joystick.b()
@@ -120,6 +131,8 @@ public class RobotContainer {
 
     joystick.y()
         .whileTrue(bicerdoverSubsystem.donmedolapReverseCommand());
+
+
 
     SwerveInputStream driveAngularVelocity =
         SwerveInputStream.of(

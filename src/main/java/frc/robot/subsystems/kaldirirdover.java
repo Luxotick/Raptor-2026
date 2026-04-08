@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FuelConstants;
@@ -23,7 +22,6 @@ public class kaldirirdover extends SubsystemBase {
         config.smartCurrentLimit(40);
         kaldirirdover_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        SmartDashboard.putNumber("Kaldirirdover Target Position", kaldirirdover_motor.getEncoder().getPosition());
     }
 
     public void yukari() {

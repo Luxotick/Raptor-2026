@@ -19,19 +19,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "test"
+            "pathName": "Copy of test1"
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "test3"
+            "name": "asilma"
           }
         }
       ]

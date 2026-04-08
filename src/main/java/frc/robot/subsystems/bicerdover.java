@@ -161,6 +161,13 @@ public class bicerdover extends SubsystemBase {
                 () -> stopIndirirdover());
     }
 
+    public Command indirirdoverDownCommand(){
+        return this.runEnd(
+                () -> setIndirirdoverTarget(FuelConstants.INDIRIRDOVER_DOWN_POSITION),
+                () -> stopIndirirdover());              
+
+    }
+
     /** Sadece bicerdover çalıştırma komutu */
     public Command bicerdoverRunCommand() {
         return this.runEnd(

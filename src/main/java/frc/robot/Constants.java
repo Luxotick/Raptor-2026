@@ -42,7 +42,7 @@ public final class Constants {
 
     // Indirirdover pozisyonları (rotasyon cinsinden, 0-1 arası)
     public static final double INDIRIRDOVER_UP_POSITION = 8;
-    public static final double INDIRIRDOVER_DOWN_POSITION = 0.5;
+    public static final double INDIRIRDOVER_DOWN_POSITION = 0;
 
     //public static final double INTAKING_FEEDER_VOLTAGE = -12;
     //public static final double INTAKING_INTAKE_VOLTAGE = 10;
